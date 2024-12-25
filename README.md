@@ -1,1 +1,1 @@
-# python-pyodbc-msodbcsql17
+# python-pyodbc-msodbcsql18
