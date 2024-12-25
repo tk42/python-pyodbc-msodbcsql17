@@ -12,7 +12,7 @@ jobs:
       packages: write
 
     env:
-      IMAGE_NAME: electron-react-boilerplate
+      IMAGE_NAME: python-pyodbc-msodbcsql18
 
     steps:
       - uses: actions/checkout@v3
