@@ -1,4 +1,4 @@
-FROM python:3.13-bookworm
+FROM --platform=linux/amd64 python:3.13-bookworm
 
 # システムのパッケージを更新
 RUN apt-get update
