@@ -1,0 +1,4 @@
+services:
+  pyodbc-msodbcsql18:
+    build: .
+    platform: linux/amd64

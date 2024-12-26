@@ -1,34 +1,32 @@
 FROM --platform=linux/amd64 python:3.13-bookworm
 
-# システムのパッケージを更新
-RUN apt-get update
+# システムのパッケージを更新と必要なパッケージのインストール
+RUN apt-get update && apt-get install -y \
+    apt-transport-https \
+    gnupg2 \
+    curl \
+    wget \
+    unixodbc \
+    unixodbc-dev \
+    tdsodbc \
+    apt-utils \
+    && apt-get clean -y
 
-# PYODBC関連の依存パッケージをインストール
-RUN apt-get install -y tdsodbc unixodbc-dev
-RUN apt-get clean -y
-ADD odbcinst.ini /etc/odbcinst.ini
-
-# pip3をアップグレード
-RUN pip3 install --upgrade pip
-
-# Microsoft製品のリポジトリを追加するための準備
-RUN apt-get install -y apt-transport-https gnupg2 curl wget
-
-# Microsoftの署名キーを正しく追加（修正版）
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/microsoft-archive-keyring.gpg \
-    && chmod go+r /usr/share/keyrings/microsoft-archive-keyring.gpg \
-    && echo "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/debian/12/prod/ bookworm main" > /etc/apt/sources.list.d/microsoft-prod.list \
+# Microsoft SQL Server の依存関係をインストール（修正版）
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/keyrings/microsoft.gpg \
+    && chmod go+r /etc/apt/keyrings/microsoft.gpg \
+    && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/debian/12/prod bookworm main" \
+    > /etc/apt/sources.list.d/mssql-release.list \
     && apt-get update
 
-# SQL Server 2016向けのODBCドライバーをインストール（修正版）
+# MSODBCドライバーのインストール
 RUN ACCEPT_EULA=Y apt-get install -y msodbcsql18
 
-# SQL Server toolsのパスを環境変数に追加
-RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile 
-RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
+# odbcinst.iniの設定
+ADD odbcinst.ini /etc/odbcinst.ini
 
-# pyodbcをインストール
-RUN pip install pyodbc
+# pip3のアップグレードとpyodbcのインストール
+RUN pip3 install --upgrade pip && pip install pyodbc
 
 # 作業ディレクトリを設定
 WORKDIR /app
